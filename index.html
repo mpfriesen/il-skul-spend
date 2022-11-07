@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>School district spending</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet">
+	<script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400;700&family=Roboto+Slab:wght@900&display=swap" rel="stylesheet">
+
+	<script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
+	<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css" type="text/css">
+	<script src='https://unpkg.com/@turf/turf@6.5.0/turf.min.js'></script>
+	<script src="https://kit.fontawesome.com/4b7b7915d1.js" crossorigin="anonymous"></script>
+	<style>
+		body { height: 100%; max-width: 680px; margin:0; background-color: #fff; font-family: "Inconsolata",monospace; overflow-x:hidden; padding: 0;}
+		.poptext {  font-family: "Inconsolata",monospace; }
+		h1,h2,h3,h4 { font-family:"Roboto Slab",serif; font-weight: 900; width:100%; margin: 0; }
+		h1 { font-size: 45px; letter-spacing: -1px; }
+		h2 { margin-top: 8px; font-size: 30px;  }
+		h3 { font-size: 21px;margin-top: 5px; }
+		h4 { font-size: 18px }
+		.explain { font-size: 15px; }
+		.credit { font-size: 11px; margin-top: 5px; }
+		.credit p { margin: 0 3px; }
+		.container { max-width: 800px; }
+		.toprow { padding: 0 15px; width: 100%; }
+		.maps { width: 100%; margin: 0;}
+		.maps path { cursor: pointer; }
+		.mapblock { position: relative; }
+		
+		.mapboxgl-ctrl-geocoder {
+			min-width: 100%;
+		}
+		.geocoder { padding: 0 1%; width: 50%; position: absolute; top: 15px; left: 15px; }
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<div class="row toprow">
+			<h1>School district spending</h1>
+			<div class="explain">
+				<p>Explanatory text</p>
+			</div>
+			<div class="mapblock">
+				<div id="geocoder" class="geocoder"></div>
+				<div id="map" class="maps"></div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- <div class="credit">
+	</div> -->
+
+<!--     <script src="js/main.js" type="text/javascript"></script> -->
+<script>
+	var distbounds = {},
+	distdata;
+	
+	$.ajax({ 
+		type: 'GET', 
+		async: false,
+		url: 'json/ill_skul_spend.json', 
+		data: { get_param: 'value' }, 
+		dataType: 'json',
+		success: function (data) { 
+			distdata = data;
+			$.each(data.features, function(k, rd) {
+				var bbox = turf.bbox(rd);
+				var dist = rd.properties.district;
+				distbounds[dist] = [[bbox[0],bbox[1]],[bbox[2],bbox[3]]];
+			});
+		}
+	});
+
+
+	function makePct(num,tot) {
+		var pct = num/tot*100;
+		return pct.toFixed(1);
+	}
+	var map = null,
+		mheight = $(".toprow").width()*1,
+		geotoken = "pk.eyJ1Ijoib3JlZ29uaWFuZGF0YSIsImEiOiJja3U2NWNlMWQya2p1MnRvcTVma2lka3FqIn0.9ckUxD-dL1JOx9dWNl5zoA",
+		lng,
+		lat;
+	$(".maps").height(mheight);
+
+		
+	function addCommas(x) {
+		return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+	}
+	
+	mapboxgl.accessToken = 'pk.eyJ1Ijoib3JlZ29uaWFuZGF0YSIsImEiOiJja3FtcjNzMWIwZjV4MndwZXdreDV3cmhtIn0.9UhWvmWH4lu_NUFOO5B5XQ';
+	var map = new mapboxgl.Map({
+		container: 'map', // container id
+		style: 'mapbox://styles/mapbox/light-v10',
+		bounds: [[ -91.65,36.85], [-87.36,42.63]],
+		localFontFamily: "Inconsolata"
+	});
+
+	const geocoder = new MapboxGeocoder({
+		accessToken: mapboxgl.accessToken,
+		countries: 'us',
+		bbox: [-92, 37, -87, 43],
+		placeholder: "Enter your address",
+		flyTo: false,
+		marker: false,
+		mapboxgl: mapboxgl
+	})
+	document.getElementById('geocoder').appendChild(geocoder.onAdd(map));
+	
+	let hoveredDistId = null;
+	map.on('load', () => {
+		map.addSource('house', {
+			'type': 'geojson',
+			'data': distdata,
+			'generateId': true
+		});
+		map.addControl(new mapboxgl.NavigationControl());
+		map.addLayer({
+			'id': 'house',
+			'type': 'fill',
+			'source': 'house', 
+			'layout': {},
+			'paint': {
+				'fill-color': [
+					"interpolate",
+					["linear"],
+					["get", "spent_pct"],
+					0,
+					"#fee5d9",
+					.25,
+					"#fcae91",
+					.5,
+					"#fb6a4a",
+					.75,
+					"#de2d26",
+					1,
+					"#a50f15"
+				],
+				'fill-opacity': [
+					  'case', ['boolean', ['feature-state', 'hover'], false],
+					  1,
+					  0.6
+					]
+							
+			}
+		});
+		
+		map.addLayer({
+			'id': 'house_outline',
+			'type': 'line',
+			'source': 'house',
+			'layout': {
+				'line-join': 'round',
+				'line-cap': 'round'
+			},
+			'paint': {
+				'line-color': "#aaa",
+				'line-width': 0.25
+			}
+		});
+		
+		// When the user moves their mouse over the state-fill layer, we'll update the
+		// feature state for the feature under the mouse.
+		map.on('mousemove', 'house', (e) => {
+			map.getCanvas().style.cursor = 'pointer';
+			if (e.features.length > 0) {
+				if (hoveredDistId !== null) {
+					map.setFeatureState(
+						{ source: 'house', id: hoveredDistId },
+						{ hover: false }
+					);
+				}
+				hoveredDistId = e.features[0].id;
+				map.setFeatureState(
+					{ source: 'house', id: hoveredDistId },
+					{ hover: true }
+				);
+			}
+		});
+		 
+		// When the mouse leaves the state-fill layer, update the feature state of the
+		// previously hovered feature.
+		map.on('mouseleave', 'house', () => {
+			if (hoveredDistId !== null) {
+				map.setFeatureState(
+					{ source: 'house', id: hoveredDistId },
+					{ hover: false }
+				);
+			}
+			hoveredDistId = null;
+		});
+		map.scrollZoom.disable();
+		
+		var circleStyle = {
+			'circle-radius': 5,
+			'circle-stroke-width': 2,
+			'circle-stroke-color': '#ffffff',
+			'circle-color': '#990000'
+		};
+		map.on('click', 'house', (e) => {
+			$("#geocoder input").text("");
+			getDistrict(e.lngLat.lat, e.lngLat.lng);
+		});
+			
+		geocoder.on('result', ({ result }) => {
+			lng = result.geometry.coordinates[0];
+			lat = result.geometry.coordinates[1];
+			getDistrict(lat,lng)
+
+		});
+
+		// years.forEach(getDistrict);
+		function getDistrict(lat,lng) {
+			console.log(lat,lng);
+			distdata.features.every(rd => {
+
+				// found = d3.geoContains(rd, [lng,lat]);
+				var pt = turf.point([lng,lat]);
+				found = turf.booleanPointInPolygon(pt,rd.geometry);
+				if(found) {
+					console.log(rd);
+				}
+				return true;
+			});
+			var point = {
+			  'type': 'FeatureCollection',
+			  'features': [{
+				  'type': 'Feature',
+				  'geometry': {
+					'type': 'Point',
+					'coordinates': [lng,lat]
+				  }
+				}
+			  ]
+			};
+			if (map.getLayer('clickpoint')) {
+			  map.removeLayer('clickpoint');
+			}
+			if (map.getSource('clickpoint')) {
+			  map.removeSource('clickpoint');
+			}
+		
+	
+			map.addSource('clickpoint', {
+				type: 'geojson',
+				data: point
+			});
+			map.addLayer({
+				id: 'clickpoint',
+				'type': 'circle',
+				'source': 'clickpoint',
+				'paint': circleStyle,
+			});
+			
+		}
+	});
+
+
+
+</script>
+</body>
+
+</html>
