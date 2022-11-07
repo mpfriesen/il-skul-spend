@@ -73,7 +73,7 @@
 			distdata = data;
 			$.each(data.features, function(k, rd) {
 				var bbox = turf.bbox(rd);
-				var dist = rd.properties.district;
+				var dist = rd.properties.GEOID;
 				distbounds[dist] = [[bbox[0],bbox[1]],[bbox[2],bbox[3]]];
 			});
 		}
@@ -259,7 +259,7 @@
 				'source': 'clickpoint',
 				'paint': circleStyle,
 			});
-			
+			map.fitBounds(distbounds[thisdist.GEOID])
 		}
 	});
 
