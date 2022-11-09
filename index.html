@@ -36,8 +36,12 @@
 		.dist_popup table td.tlabel { width: 50%; }
 		.tnum { font-weight: 600; }
 		.geoblock { padding: 0 1%; width: 50%; position: absolute; top: 15px; left: 15px; z-index:5; }
-		.legend_block div {height: 12px;}
-		.legend-block { display:inline-block; font-size: 9px; width: 20px; height: 10px; text-align: right;  }
+		.legend { width: 220px;  }
+		.legend div {height: 12px;}
+		.legend-block { display:inline-block; font-size: 9px; width: 20%; height: 10px;   }
+		.legend_colors { width:200px; }
+		.legend_labels { margin-left:10%; }
+		.legend_labels .legend-block {  text-align: center; }
 		.c1 {background-color: #fee5d9;}
 		.c2 {background-color: #fcae91;}
 		.c3 {background-color: #fb6a4a;}
@@ -53,20 +57,12 @@
 			<div class="mapblock">
 				<div class="geoblock">
 					<div id="geocoder" class="geocoder"></div>
-					<div class="legend_block">
-						<div>
-							<span class="legend-block c1"></span>
-							<span class="legend-block c2"></span>
-							<span class="legend-block c3"></span>
-							<span class="legend-block c4"></span>
-							<span class="legend-block c5"></span>
+					<div class="legend">
+						<div class="legend_colors">
+							<span class="legend-block c1"></span><span class="legend-block c2"></span><span class="legend-block c3"></span><span class="legend-block c4"></span><span class="legend-block c5"></span>
 						</div>
-						<div>
-							<span class="legend-block" style="width:20px;height:10px;">0%</span>
-							<span class="legend-block" style="width:20px;height:10px;">25%</span>
-							<span class="legend-block" style="width:20px;height:10px;">50%</span>
-							<span class="legend-block" style="width:20px;height:10px;">75%</span>
-							<span class="legend-block" style="width:20px;height:10px;">100%</span>
+						<div class="legend_labels">
+							<span class="legend-block">25%</span><span class="legend-block">50%</span><span class="legend-block">75%</span><span class="legend-block">100%</span>
 						</div>
 					</div>
 				</div>
