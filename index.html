@@ -206,8 +206,19 @@
 				'line-cap': 'round'
 			},
 			'paint': {
-				'line-color': "#aaa",
-				'line-width': 0.25
+				'line-opacity': .5,
+				'line-color': [
+					'case',
+					['boolean', ['feature-state', 'hover'], false],
+					"#000",
+					"#888"
+				],
+				'line-width': [
+					'case',
+					['boolean', ['feature-state', 'hover'], false],
+					1,
+					.25
+				]
 			}
 		});
 		
@@ -265,7 +276,6 @@
 			return html;
 			
 		}
-		
 		
 			map.on('mouseenter', 'k12', (e) => {
 				map.getCanvas().style.cursor = 'pointer';
