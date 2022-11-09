@@ -123,7 +123,7 @@
 	}
 	var map = null,
 		mheight = $(".toprow").width()*1,
-		geotoken = "pk.eyJ1Ijoib3JlZ29uaWFuZGF0YSIsImEiOiJja3U2NWNlMWQya2p1MnRvcTVma2lka3FqIn0.9ckUxD-dL1JOx9dWNl5zoA",
+		geotoken = "pk.eyJ1IjoiYmdhLXBqdWRnZSIsImEiOiJjbGE5d2U1dzEwMDhxM29wYmc1ejQzNWNsIn0.-ZDzB7HieP4c5OwqWMaH2g",
 		lng,
 		lat;
 		
@@ -212,9 +212,34 @@
 		});
 		
 		function makePopup(p) {
+			var dist1 = "";
 			var dist2 = "";
+			var second = "";
+			if (p.spent!=="null") {
+				second = "_2";
+				dist1 = "<div class='dist'>"
+					+ "<div class='dist_popup'>"
+					+ "<div class='dist_name'>"+p.full_name+"</div>"
+					+ "<table>"
+					+ 	"<tr>"
+					+ 		"<td class='tlabel'>Enrollment</td>"
+					+ 		"<td class='tnum'>"+addCommas(p.enroll)+"</td>"
+					+ 	"</tr>"
+					+ 	"<tr>"
+					+ 		"<td class='tlabel'>Total funds</td>"
+					+ 		"<td class='tnum'>$"+addCommas(p.spent)+"</td>"
+					+ 	"</tr>"
+					+ 	"<tr>"
+					+ 		"<td class='tlabel'>Percent spent</td>"
+					+ 		"<td class='tnum'>"+makePct(p.spent_pct)+"%</td>"
+					+ 	"</tr>"
+					+ "</table>"
+					+ "</div>"
+					+ "</div>";
+			}
+
 			if (p.spent_2!=="null") {
-				dist2 = "<div class='dist_2'>"
+				dist2 = "<div class='dist"+second+"'>"
 					+ "<div class='dist_popup'>"
 					+ "<div class='dist_name'>"+p.full_name_2+"</div>"
 					+ "<table>"
@@ -231,27 +256,12 @@
 					+ 		"<td class='tnum'>"+makePct(p.spent_pct_2)+"%</td>"
 					+ 	"</tr>"
 					+ "</table>"
-					+ "</div>"
 					+ "</div>";
 			}
 			var html = "<div class='dist_popup'>"
-				+ "<div class='dist_name'>"+p.full_name+"</div>"
-				+ "<table>"
-				+ 	"<tr>"
-				+ 		"<td class='tlabel'>Enrollment</td>"
-				+ 		"<td class='tnum'>"+addCommas(p.enroll)+"</td>"
-				+ 	"</tr>"
-				+ 	"<tr>"
-				+ 		"<td class='tlabel'>Total funds</td>"
-				+ 		"<td class='tnum'>$"+addCommas(p.spent)+"</td>"
-				+ 	"</tr>"
-				+ 	"<tr>"
-				+ 		"<td class='tlabel'>Percent spent</td>"
-				+ 		"<td class='tnum'>"+makePct(p.spent_pct)+"%</td>"
-				+ 	"</tr>"
-				+ "</table>"
+				+ dist1
+				+ dist2
 				+ "</div>"
-				+ dist2;
 			return html;
 			
 		}
