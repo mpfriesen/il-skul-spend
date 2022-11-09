@@ -18,6 +18,8 @@
 	<link rel="stylesheet" href="https://use.typekit.net/hid5kve.css">
 	<script src='https://unpkg.com/@turf/turf@6.5.0/turf.min.js'></script>
 	<script src="https://kit.fontawesome.com/4b7b7915d1.js" crossorigin="anonymous"></script>
+	<script type="text/javascript" src="https://pym.nprapps.org/pym.v1.min.js"></script>
+
 	<style>
 		body { height: 100%; max-width: 680px; margin:0; background-color: #fff; font-family: 'halyard-text', Helvetica, sans-serif; font-weight:400; overflow-x:hidden; padding: 0;}
 		.explain { font-size: 15px; }
@@ -394,7 +396,7 @@
 		}
 	});
 
-
+	var pymChild = new pym.Child({ polling: 500 });
 
 </script>
 </body>
